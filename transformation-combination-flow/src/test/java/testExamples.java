@@ -66,7 +66,40 @@ public class testExamples {
 
         StepVerifier.create(fluxMerged)
                 .expectSubscription()
-                .expectNextCount(6)
+                .expectNextCount(6  )
+                .verifyComplete();
+    }
+
+    //Merge flows with Concat delay Example
+    @Test
+    public void mergeFlowsWithConcatDelay(){
+        Flux<String> flux1 = Flux.just("Blenders", "Old", "Jonnie")
+                .delayElements(Duration.ofSeconds(1));
+        Flux<String> flux2 = Flux.just("Panda", "Monkey", "Walker")
+                .delayElements(Duration.ofSeconds(1));
+
+        Flux<String> fluxConcated = Flux.concat(flux1, flux2).log();
+
+        StepVerifier.create(fluxConcated)
+                .expectSubscription()
+                .expectNext("Blenders", "Old", "Jonnie", "Panda", "Monkey", "Walker")
+                .verifyComplete();
+    }
+
+    //Merge flows with Zip delay Example
+    @Test
+    public void mergeFlowsWithZipDelay(){
+        Flux<String> flux1 = Flux.just("Blenders", "Old", "Jonnie")
+                .delayElements(Duration.ofSeconds(1));
+        Flux<String> flux2 = Flux.just("Panda", "Monkey", "Walker")
+                .delayElements(Duration.ofSeconds(1));
+
+        Flux<String> fluxZiped = Flux.zip(flux1, flux2, (f1, f2)->{
+            return f1.concat(" ").concat(f2);
+        }).log();
+
+        StepVerifier.create(fluxZiped)
+                .expectNext("Blenders Panda", "Old Monkey", "Jonnie Walker")
                 .verifyComplete();
     }
 }
